@@ -3,7 +3,7 @@ import axios from 'axios';
 
 const MarsRoverPhotosPage = () => {
   const [photos, setPhotos] = useState([]);
-  const apiKey = 'mn0cL646A86fzVD3vI3MdMpphxncHeUDjNCzgPja'; // Replace with your NASA API key
+  const apiKey = 'mn0cL646A86fzVD3vI3MdMpphxncHeUDjNCzgPja';
 
   useEffect(() => {
     axios
