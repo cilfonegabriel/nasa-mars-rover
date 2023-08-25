@@ -130,6 +130,12 @@ body {
   padding: 20px;
 }
 
+.photo-date {
+  font-size: 14px;
+  margin-top: 5px;
+  color: #66fcf1;
+}
+
 /* Responsive grid styles */
 @media (max-width: 768px) {
   .photo-gallery {
