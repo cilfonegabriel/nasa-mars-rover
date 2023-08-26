@@ -50,6 +50,8 @@ const MarsRoverPhotosPage = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const cameraOptions = Array.from(new Set(photos.map((photo) => photo.camera.name)));
+
   const filteredPhotos = selectedCamera
     ? photos.filter((photo) => photo.camera.name === selectedCamera)
     : photos;
@@ -62,6 +64,7 @@ const MarsRoverPhotosPage = () => {
   );
 
   const isRoverSelected = rover !== '';
+  const isCameraSelected = selectedCamera !== '';
 
   return (
     <div className="mars-rover-photos-container">
@@ -88,52 +91,56 @@ const MarsRoverPhotosPage = () => {
           Spirit
         </button>
       </div>
-      <div className="camera-dropdown">
-        <select
-          value={selectedCamera}
-          onChange={(e) => setSelectedCamera(e.target.value)}
-        >
-          <option value="">All Cameras</option>
-          {photos.map((photo) => (
-            <option key={photo.id} value={photo.camera.name}>
-              {photo.camera.full_name}
-            </option>
-          ))}
-        </select>
-      </div>
-      <div className="rover-photos-container">
-        <div className="photo-gallery">
-          {isLoading ? (
-            <p>Loading...</p>
-          ) : currentPhotos.length > 0 ? (
-            currentPhotos.map((photo) => (
-              <div className="photo-card" key={photo.id}>
-                <h2 className="camera-name">{photo.camera.full_name}</h2>
-                <img
-                  src={photo.img_src}
-                  alt={`Mars ${photo.id}`}
-                  className="rover-photo"
-                />
-                <p className="photo-date">Date Taken: {photo.earth_date}</p>
-              </div>
-            ))
-          ) : (
-            <p>No photos available.</p>
-          )}
-        </div>
-        {isRoverSelected && (
-          <div className="pagination-container">
-            <ReactPaginate
-              previousLabel={'← Previous'}
-              nextLabel={'Next →'}
-              pageCount={Math.ceil(filteredPhotos.length / photosPerPage)}
-              onPageChange={handlePageClick}
-              containerClassName={'pagination'}
-              activeClassName={'active'}
-            />
+      {isRoverSelected && (
+        <div>
+          <div className="camera-dropdown">
+            <select
+              value={selectedCamera}
+              onChange={(e) => setSelectedCamera(e.target.value)}
+            >
+              <option value="">All Cameras</option>
+              {cameraOptions.map((cameraName) => (
+                <option key={cameraName} value={cameraName}>
+                  {cameraName}
+                </option>
+              ))}
+            </select>
           </div>
-        )}
-      </div>
+          <div className="rover-photos-container">
+            <div className="photo-gallery">
+              {isLoading ? (
+                <p>Loading...</p>
+              ) : currentPhotos.length > 0 ? (
+                currentPhotos.map((photo) => (
+                  <div className="photo-card" key={photo.id}>
+                    <h2 className="camera-name">{photo.camera.full_name}</h2>
+                    <img
+                      src={photo.img_src}
+                      alt={`Mars ${photo.id}`}
+                      className="rover-photo"
+                    />
+                    <p className="photo-date">Date Taken: {photo.earth_date}</p>
+                  </div>
+                ))
+              ) : (
+                <p>No photos available.</p>
+              )}
+            </div>
+            {isCameraSelected && (
+              <div className="pagination-container">
+                <ReactPaginate
+                  previousLabel={'← Previous'}
+                  nextLabel={'Next →'}
+                  pageCount={Math.ceil(filteredPhotos.length / photosPerPage)}
+                  onPageChange={handlePageClick}
+                  containerClassName={'pagination'}
+                  activeClassName={'active'}
+                />
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
