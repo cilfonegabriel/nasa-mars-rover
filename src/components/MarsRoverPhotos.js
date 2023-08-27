@@ -2,15 +2,6 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import ReactPaginate from 'react-paginate';
 
-function getSolForCurrentDate() {
-  const missionStartDate = new Date(2023, 0, 1);
-  const currentDate = new Date();
-  const timeDifference = currentDate - missionStartDate;
-  const daysDifference = timeDifference / (1000 * 60 * 60 * 24);
-  const sol = Math.floor(daysDifference);
-  return sol;
-}
-
 const MarsRoverPhotosPage = () => {
   const [rover, setRover] = useState('');
   const [photos, setPhotos] = useState([]);
@@ -18,7 +9,6 @@ const MarsRoverPhotosPage = () => {
   const photosPerPage = 25;
   const apiKey = 'mn0cL646A86fzVD3vI3MdMpphxncHeUDjNCzgPja';
   const [isLoading, setIsLoading] = useState(false);
-  const sol = getSolForCurrentDate();
   const [selectedCamera, setSelectedCamera] = useState('');
 
   useEffect(() => {
@@ -26,10 +16,10 @@ const MarsRoverPhotosPage = () => {
       setIsLoading(true);
       axios
         .get(
-          `https://api.nasa.gov/mars-photos/api/v1/rovers/${rover}/photos?sol=1000&api_key=${apiKey}`,
+          `https://api.nasa.gov/mars-photos/api/v1/rovers/${rover}/latest_photos?earth_date=2023-12-31&api_key=${apiKey}`,
         )
         .then((response) => {
-          setPhotos(response.data.photos);
+          setPhotos(response.data.latest_photos);
           setIsLoading(false);
         })
         .catch((error) => {
@@ -37,7 +27,7 @@ const MarsRoverPhotosPage = () => {
           setIsLoading(false);
         });
     }
-  }, [rover, sol]);
+  }, [rover]);
 
   const handleRoverChange = (selectedRover) => {
     setRover(selectedRover);
@@ -50,7 +40,9 @@ const MarsRoverPhotosPage = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const cameraOptions = Array.from(new Set(photos.map((photo) => photo.camera.name)));
+  const cameraOptions = Array.from(
+    new Set(photos.map((photo) => photo.camera.name))
+  );
 
   const filteredPhotos = selectedCamera
     ? photos.filter((photo) => photo.camera.name === selectedCamera)
