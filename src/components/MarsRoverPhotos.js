@@ -69,6 +69,20 @@ const MarsRoverPhotosPage = () => {
     setSelectedPhoto(null);
   };
 
+  const saveFavoritePhoto = () => {
+    if (selectedPhoto) {
+      const favoriteData = {
+        photo: selectedPhoto,
+        dateSaved: new Date().toISOString(),
+      };
+
+      const favorites = JSON.parse(localStorage.getItem('favoritePhotos')) || [];
+      favorites.push(favoriteData);
+
+      localStorage.setItem('favoritePhotos', JSON.stringify(favorites));
+    }
+  };
+
   const filteredPhotos = selectedCamera
     ? (rover === 'curiosity'
         ? curiosityPhotos
@@ -157,17 +171,16 @@ const MarsRoverPhotosPage = () => {
                 <p>No photos available.</p>
               )}
             </div>
-              <div className="pagination-container">
-                <ReactPaginate
-                  previousLabel={'← Previous'}
-                  nextLabel={'Next →'}
-                  pageCount={Math.ceil(filteredPhotos.length / photosPerPage)}
-                  onPageChange={handlePageClick}
-                  containerClassName={'pagination'}
-                  activeClassName={'active'}
-                />
-              </div>
-
+            <div className="pagination-container">
+              <ReactPaginate
+                previousLabel={'← Previous'}
+                nextLabel={'Next →'}
+                pageCount={Math.ceil(filteredPhotos.length / photosPerPage)}
+                onPageChange={handlePageClick}
+                containerClassName={'pagination'}
+                activeClassName={'active'}
+              />
+            </div>
           </div>
         </div>
       )}
@@ -182,6 +195,9 @@ const MarsRoverPhotosPage = () => {
               alt={`Mars ${selectedPhoto.id}`}
               className="enlarged-photo"
             />
+            <div className="favorite-button-container">
+              <button onClick={saveFavoritePhoto}>Save as Favorite</button>
+            </div>
           </div>
         </div>
       )}
