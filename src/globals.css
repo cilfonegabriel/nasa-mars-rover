@@ -6,7 +6,6 @@ body {
   padding: 0;
 }
 
-/* Header styles */
 .header {
   background-color: #020509;
   color: #66fcf1;
@@ -20,7 +19,6 @@ body {
   font-size: 28px;
 }
 
-/* Button styles */
 .rover-buttons {
   text-align: center;
   margin: 20px 0;
@@ -41,7 +39,6 @@ body {
   background-color: #367a74;
 }
 
-/* Photo gallery grid */
 .photo-gallery {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -71,7 +68,6 @@ body {
   border-radius: 4px;
 }
 
-/* Pagination styles */
 .pagination {
   display: flex;
   justify-content: center;
@@ -98,7 +94,6 @@ body {
   border-color: #45a29e;
 }
 
-/* Main landing page styles */
 .main-page {
   display: flex;
   flex-direction: column;
@@ -134,7 +129,6 @@ body {
   border-radius: 4px;
 }
 
-/* Photo modal styles */
 .photo-modal {
   display: flex;
   align-items: center;
@@ -165,7 +159,6 @@ body {
   cursor: pointer;
 }
 
-/* Camera dropdown styles */
 .camera-dropdown {
   margin-bottom: 10px;
 }
@@ -186,7 +179,26 @@ body {
   box-shadow: 0 0 3px rgba(69, 162, 158, 0.8);
 }
 
-/* Responsive grid styles */
+.favorite-button-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.favorite-button {
+  background-color: #45a29e;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  cursor: pointer;
+  border-radius: 4px;
+  font-size: 16px;
+}
+
+.favorite-button:hover {
+  background-color: #367a74;
+}
+
 @media (max-width: 768px) {
   .photo-gallery {
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
