@@ -2,44 +2,55 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import ReactPaginate from 'react-paginate';
 
-function getSolForCurrentDate() {
-  const missionStartDate = new Date(2023, 0, 1);
-  const currentDate = new Date();
-  const timeDifference = currentDate - missionStartDate;
-  const daysDifference = timeDifference / (1000 * 60 * 60 * 24);
-  const sol = Math.floor(daysDifference);
-  return sol;
-}
-
 const MarsRoverPhotosPage = () => {
   const [rover, setRover] = useState('');
-  const [photos, setPhotos] = useState([]);
+  const [curiosityPhotos, setCuriosityPhotos] = useState([]);
+  const [opportunityPhotos, setOpportunityPhotos] = useState([]);
+  const [spiritPhotos, setSpiritPhotos] = useState([]);
   const [currentPage, setCurrentPage] = useState(0);
   const photosPerPage = 25;
   const apiKey = 'mn0cL646A86fzVD3vI3MdMpphxncHeUDjNCzgPja';
   const [isLoading, setIsLoading] = useState(false);
-  const sol = getSolForCurrentDate();
   const [selectedCamera, setSelectedCamera] = useState('');
+  const [availableCameras, setAvailableCameras] = useState([
+    'FHAZ', 'RHAZ', 'MAST', 'CHEMCAM', 'MAHLI', 'MARDI', 'PANCA', 'MINITES', 'NAVCAM'
+  ]);
+
+  const [selectedPhoto, setSelectedPhoto] = useState(null);
 
   useEffect(() => {
-    if (rover) {
+    if (rover === 'curiosity') {
       setIsLoading(true);
-      axios
-        .get(
-          `https://api.nasa.gov/mars-photos/api/v1/rovers/${rover}/photos?sol=1000&api_key=${apiKey}`,
-        )
-        .then((response) => {
-          setPhotos(response.data.photos);
-          setIsLoading(false);
-        })
-        .catch((error) => {
-          console.error('Error fetching data:', error);
-          setIsLoading(false);
-        });
+      fetchPhotosForRover('curiosity', setCuriosityPhotos);
+    } else if (rover === 'opportunity') {
+      setIsLoading(true);
+      fetchPhotosForRover('opportunity', setOpportunityPhotos);
+    } else if (rover === 'spirit') {
+      setIsLoading(true);
+      fetchPhotosForRover('spirit', setSpiritPhotos);
     }
-  }, [rover, sol]);
+    setAvailableCameras([
+      'FHAZ', 'RHAZ', 'MAST', 'CHEMCAM', 'MAHLI', 'MARDI', 'PANCA', 'MINITES', 'NAVCAM'
+    ]);
+  }, [rover]);
+
+  const fetchPhotosForRover = async (roverName, setPhotosCallback) => {
+    try {
+      const response = await axios.get(
+        `https://api.nasa.gov/mars-photos/api/v1/rovers/${roverName}/latest_photos?api_key=${apiKey}`
+      );
+      const latestPhotos = response.data.latest_photos;
+      setPhotosCallback(latestPhotos);
+      setIsLoading(false);
+    } catch (error) {
+      console.error('Error fetching photos:', error);
+      setIsLoading(false);
+    }
+  };
 
   const handleRoverChange = (selectedRover) => {
+    console.log('Changing rover to:', selectedRover);
+
     setRover(selectedRover);
     setSelectedCamera('');
     setCurrentPage(0);
@@ -50,9 +61,28 @@ const MarsRoverPhotosPage = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const handlePhotoClick = (photo) => {
+    setSelectedPhoto(photo);
+  };
+
+  const handleClosePhoto = () => {
+    setSelectedPhoto(null);
+  };
+
   const filteredPhotos = selectedCamera
-    ? photos.filter((photo) => photo.camera.name === selectedCamera)
-    : photos;
+    ? (rover === 'curiosity'
+        ? curiosityPhotos
+        : rover === 'opportunity'
+        ? opportunityPhotos
+        : spiritPhotos
+      ).filter((photo) => photo.camera.name === selectedCamera)
+    : rover === 'curiosity'
+    ? curiosityPhotos
+    : rover === 'opportunity'
+    ? opportunityPhotos
+    : spiritPhotos;
+
+  filteredPhotos.sort((a, b) => new Date(b.earth_date) - new Date(a.earth_date));
 
   const indexOfLastPhoto = (currentPage + 1) * photosPerPage;
   const indexOfFirstPhoto = indexOfLastPhoto - photosPerPage;
@@ -88,52 +118,73 @@ const MarsRoverPhotosPage = () => {
           Spirit
         </button>
       </div>
-      <div className="camera-dropdown">
-        <select
-          value={selectedCamera}
-          onChange={(e) => setSelectedCamera(e.target.value)}
-        >
-          <option value="">All Cameras</option>
-          {photos.map((photo) => (
-            <option key={photo.id} value={photo.camera.name}>
-              {photo.camera.full_name}
-            </option>
-          ))}
-        </select>
-      </div>
-      <div className="rover-photos-container">
-        <div className="photo-gallery">
-          {isLoading ? (
-            <p>Loading...</p>
-          ) : currentPhotos.length > 0 ? (
-            currentPhotos.map((photo) => (
-              <div className="photo-card" key={photo.id}>
-                <h2 className="camera-name">{photo.camera.full_name}</h2>
-                <img
-                  src={photo.img_src}
-                  alt={`Mars ${photo.id}`}
-                  className="rover-photo"
+      {isRoverSelected && (
+        <div>
+          <div className="camera-dropdown">
+            <select
+              value={selectedCamera}
+              onChange={(e) => setSelectedCamera(e.target.value)}
+            >
+              <option value="">All Cameras</option>
+              {availableCameras.map((cameraName) => (
+                <option key={cameraName} value={cameraName}>
+                  {cameraName}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="rover-photos-container">
+            <div className="photo-gallery">
+              {isLoading ? (
+                <p>Loading...</p>
+              ) : currentPhotos.length > 0 ? (
+                currentPhotos.map((photo) => (
+                  <div
+                    className="photo-card"
+                    key={photo.id}
+                    onClick={() => handlePhotoClick(photo)}
+                  >
+                    <h2 className="camera-name">{photo.camera.full_name}</h2>
+                    <img
+                      src={photo.img_src}
+                      alt={`Mars ${photo.id}`}
+                      className="rover-photo"
+                    />
+                    <p className="photo-date">Date Taken: {photo.earth_date}</p>
+                  </div>
+                ))
+              ) : (
+                <p>No photos available.</p>
+              )}
+            </div>
+              <div className="pagination-container">
+                <ReactPaginate
+                  previousLabel={'← Previous'}
+                  nextLabel={'Next →'}
+                  pageCount={Math.ceil(filteredPhotos.length / photosPerPage)}
+                  onPageChange={handlePageClick}
+                  containerClassName={'pagination'}
+                  activeClassName={'active'}
                 />
-                <p className="photo-date">Date Taken: {photo.earth_date}</p>
               </div>
-            ))
-          ) : (
-            <p>No photos available.</p>
-          )}
+
+          </div>
         </div>
-        {isRoverSelected && (
-          <div className="pagination-container">
-            <ReactPaginate
-              previousLabel={'← Previous'}
-              nextLabel={'Next →'}
-              pageCount={Math.ceil(filteredPhotos.length / photosPerPage)}
-              onPageChange={handlePageClick}
-              containerClassName={'pagination'}
-              activeClassName={'active'}
+      )}
+      {selectedPhoto && (
+        <div className="photo-modal">
+          <div className="photo-modal-content">
+            <span className="photo-modal-close" onClick={handleClosePhoto}>
+              &times;
+            </span>
+            <img
+              src={selectedPhoto.img_src}
+              alt={`Mars ${selectedPhoto.id}`}
+              className="enlarged-photo"
             />
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 };
