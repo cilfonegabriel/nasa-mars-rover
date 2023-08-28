@@ -9,7 +9,7 @@ const MarsRoverPhotosPage = () => {
   const [spiritPhotos, setSpiritPhotos] = useState([]);
   const [currentPage, setCurrentPage] = useState(0);
   const photosPerPage = 25;
-  const apiKey = 'mn0cL646A86fzVD3vI3MdMpphxncHeUDjNCzgPja'; // Replace with your actual API key
+  const apiKey = 'mn0cL646A86fzVD3vI3MdMpphxncHeUDjNCzgPja';
   const [isLoading, setIsLoading] = useState(false);
   const [selectedCamera, setSelectedCamera] = useState('');
   const [availableCameras, setAvailableCameras] = useState([
