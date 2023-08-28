@@ -4,32 +4,53 @@ import ReactPaginate from 'react-paginate';
 
 const MarsRoverPhotosPage = () => {
   const [rover, setRover] = useState('');
-  const [photos, setPhotos] = useState([]);
+  const [curiosityPhotos, setCuriosityPhotos] = useState([]);
+  const [opportunityPhotos, setOpportunityPhotos] = useState([]);
+  const [spiritPhotos, setSpiritPhotos] = useState([]);
   const [currentPage, setCurrentPage] = useState(0);
   const photosPerPage = 25;
-  const apiKey = 'mn0cL646A86fzVD3vI3MdMpphxncHeUDjNCzgPja';
+  const apiKey = 'mn0cL646A86fzVD3vI3MdMpphxncHeUDjNCzgPja'; // Replace with your actual API key
   const [isLoading, setIsLoading] = useState(false);
   const [selectedCamera, setSelectedCamera] = useState('');
+  const [availableCameras, setAvailableCameras] = useState([
+    'FHAZ', 'RHAZ', 'MAST', 'CHEMCAM', 'MAHLI', 'MARDI', 'PANCA', 'MINITES', 'NAVCAM'
+  ]);
+
+  const [selectedPhoto, setSelectedPhoto] = useState(null);
 
   useEffect(() => {
-    if (rover) {
+    if (rover === 'curiosity') {
       setIsLoading(true);
-      axios
-        .get(
-          `https://api.nasa.gov/mars-photos/api/v1/rovers/${rover}/latest_photos?earth_date=2023-12-31&api_key=${apiKey}`,
-        )
-        .then((response) => {
-          setPhotos(response.data.latest_photos);
-          setIsLoading(false);
-        })
-        .catch((error) => {
-          console.error('Error fetching data:', error);
-          setIsLoading(false);
-        });
+      fetchPhotosForRover('curiosity', setCuriosityPhotos);
+    } else if (rover === 'opportunity') {
+      setIsLoading(true);
+      fetchPhotosForRover('opportunity', setOpportunityPhotos);
+    } else if (rover === 'spirit') {
+      setIsLoading(true);
+      fetchPhotosForRover('spirit', setSpiritPhotos);
     }
+    setAvailableCameras([
+      'FHAZ', 'RHAZ', 'MAST', 'CHEMCAM', 'MAHLI', 'MARDI', 'PANCA', 'MINITES', 'NAVCAM'
+    ]);
   }, [rover]);
 
+  const fetchPhotosForRover = async (roverName, setPhotosCallback) => {
+    try {
+      const response = await axios.get(
+        `https://api.nasa.gov/mars-photos/api/v1/rovers/${roverName}/latest_photos?api_key=${apiKey}`
+      );
+      const latestPhotos = response.data.latest_photos;
+      setPhotosCallback(latestPhotos);
+      setIsLoading(false);
+    } catch (error) {
+      console.error('Error fetching photos:', error);
+      setIsLoading(false);
+    }
+  };
+
   const handleRoverChange = (selectedRover) => {
+    console.log('Changing rover to:', selectedRover);
+
     setRover(selectedRover);
     setSelectedCamera('');
     setCurrentPage(0);
@@ -40,13 +61,28 @@ const MarsRoverPhotosPage = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const cameraOptions = Array.from(
-    new Set(photos.map((photo) => photo.camera.name))
-  );
+  const handlePhotoClick = (photo) => {
+    setSelectedPhoto(photo);
+  };
+
+  const handleClosePhoto = () => {
+    setSelectedPhoto(null);
+  };
 
   const filteredPhotos = selectedCamera
-    ? photos.filter((photo) => photo.camera.name === selectedCamera)
-    : photos;
+    ? (rover === 'curiosity'
+        ? curiosityPhotos
+        : rover === 'opportunity'
+        ? opportunityPhotos
+        : spiritPhotos
+      ).filter((photo) => photo.camera.name === selectedCamera)
+    : rover === 'curiosity'
+    ? curiosityPhotos
+    : rover === 'opportunity'
+    ? opportunityPhotos
+    : spiritPhotos;
+
+  filteredPhotos.sort((a, b) => new Date(b.earth_date) - new Date(a.earth_date));
 
   const indexOfLastPhoto = (currentPage + 1) * photosPerPage;
   const indexOfFirstPhoto = indexOfLastPhoto - photosPerPage;
@@ -91,7 +127,7 @@ const MarsRoverPhotosPage = () => {
               onChange={(e) => setSelectedCamera(e.target.value)}
             >
               <option value="">All Cameras</option>
-              {cameraOptions.map((cameraName) => (
+              {availableCameras.map((cameraName) => (
                 <option key={cameraName} value={cameraName}>
                   {cameraName}
                 </option>
@@ -104,7 +140,11 @@ const MarsRoverPhotosPage = () => {
                 <p>Loading...</p>
               ) : currentPhotos.length > 0 ? (
                 currentPhotos.map((photo) => (
-                  <div className="photo-card" key={photo.id}>
+                  <div
+                    className="photo-card"
+                    key={photo.id}
+                    onClick={() => handlePhotoClick(photo)}
+                  >
                     <h2 className="camera-name">{photo.camera.full_name}</h2>
                     <img
                       src={photo.img_src}
@@ -130,6 +170,20 @@ const MarsRoverPhotosPage = () => {
                 />
               </div>
             )}
+          </div>
+        </div>
+      )}
+      {selectedPhoto && (
+        <div className="photo-modal">
+          <div className="photo-modal-content">
+            <span className="photo-modal-close" onClick={handleClosePhoto}>
+              &times;
+            </span>
+            <img
+              src={selectedPhoto.img_src}
+              alt={`Mars ${selectedPhoto.id}`}
+              className="enlarged-photo"
+            />
           </div>
         </div>
       )}
