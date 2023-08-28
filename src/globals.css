@@ -42,7 +42,6 @@ body {
 }
 
 /* Photo gallery grid */
-
 .photo-gallery {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -186,8 +185,6 @@ body {
   border-color: #45a29e;
   box-shadow: 0 0 3px rgba(69, 162, 158, 0.8);
 }
-
-
 
 /* Responsive grid styles */
 @media (max-width: 768px) {
