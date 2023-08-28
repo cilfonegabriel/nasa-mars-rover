@@ -80,7 +80,6 @@
 
 To get a local copy up and running, follow these steps:
 
-```sh
 npm install
 npm run start
 
