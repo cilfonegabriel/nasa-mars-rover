@@ -92,7 +92,6 @@ const MarsRoverPhotosPage = () => {
   );
 
   const isRoverSelected = rover !== '';
-  const isCameraSelected = selectedCamera !== '';
 
   return (
     <div className="mars-rover-photos-container">
@@ -158,7 +157,6 @@ const MarsRoverPhotosPage = () => {
                 <p>No photos available.</p>
               )}
             </div>
-            {isCameraSelected && (
               <div className="pagination-container">
                 <ReactPaginate
                   previousLabel={'← Previous'}
@@ -169,7 +167,7 @@ const MarsRoverPhotosPage = () => {
                   activeClassName={'active'}
                 />
               </div>
-            )}
+
           </div>
         </div>
       )}
